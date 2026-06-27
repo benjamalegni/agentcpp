@@ -101,6 +101,8 @@ int main(int argc, char* argv[]) {
         std::ostringstream buffer;
         buffer << file.rdbuf();
 
+        std::cout << buffer.str();
+
         return 0;
       }
     }
