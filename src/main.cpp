@@ -7,6 +7,19 @@
 
 using json = nlohmann::json;
 
+
+struct tool_calls_choices{
+  int index,
+  cpr::json message,
+  std::string finnish_reason
+}
+
+struct tool_calls{
+  std::string id,
+  std::string type,
+  cpt::json function,
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 3 || std::string(argv[1]) != "-p") {
         std::cerr << "Expected first argument to be '-p'" << std::endl;
@@ -76,6 +89,11 @@ int main(int argc, char* argv[]) {
     if (!result.contains("choices") || result["choices"].empty()) {
         std::cerr << "No choices in response" << std::endl;
         return 1;
+    }
+
+    if(result["choices"][0].contains("tool_calls") && !result["choices"][0]["tool_calls"].empty()) {
+        std::string tool_call = result["choices"][0];
+        std::out << "Tool call detected: " << tool_call << std::endl;
     }
 
     // You can use print statements as follows for debugging, they'll be visible when running tests.
