@@ -98,7 +98,10 @@ int main(int argc, char* argv[]) {
         std::string file_path = arguments["file_path"];
         std::ifstream file(file_path);
 
-        std::cout<< message["content"].get<std::string>() << std::endl;
+        std::ostringstream buffer;
+        buffer << file.rdbuf();
+
+        return 0;
       }
     }
 
