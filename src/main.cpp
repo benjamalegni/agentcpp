@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <iostream>
+#include <ifstream>
 #include <string>
 
 #include <cpr/cpr.h>
