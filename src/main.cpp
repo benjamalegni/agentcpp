@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
         std::ifstream file(file_path);
 
         std::ostringstream buffer;
-        buffer << file.rdbuf();
+        buffer << file.str();
 
         return 0;
       }
