@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
               }
             }}}
         })}
-    };
+    }};
 
     cpr::Response response = cpr::Post(
         cpr::Url{base_url + "/chat/completions"},
