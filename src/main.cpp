@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
 
       if(function_name == "Read") {
         std::string file_path = arguments["file_path"];
-        std::fstream;
+        std::ifstream file(file_path);
 
         std::cout<< message["content"].get<std::string>() << std::endl;
       }
