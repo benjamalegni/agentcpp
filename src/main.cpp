@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
       std::string tool_id = tool_call["id"];
       std::string tool_type = tool_call["type"];
 
-      json function = tool_call["function"]
+      json function = tool_call["function"];
       std::string function_name = function["name"];
 
       json arguments = json::parse(function["arguments"]);
