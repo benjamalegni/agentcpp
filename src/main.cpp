@@ -7,19 +7,6 @@
 
 using json = nlohmann::json;
 
-
-struct tool_calls_choices{
-  int index,
-  cpr::json message,
-  std::string finnish_reason
-}
-
-struct tool_calls{
-  std::string id,
-  std::string type,
-  cpt::json function,
-}
-
 int main(int argc, char* argv[]) {
     if (argc < 3 || std::string(argv[1]) != "-p") {
         std::cerr << "Expected first argument to be '-p'" << std::endl;
@@ -86,14 +73,30 @@ int main(int argc, char* argv[]) {
 
     json result = json::parse(response.text);
 
+    json message = result["choices"][0]["message"];
+
     if (!result.contains("choices") || result["choices"].empty()) {
         std::cerr << "No choices in response" << std::endl;
         return 1;
     }
 
-    if(result["choices"][0].contains("tool_calls") && !result["choices"][0]["tool_calls"].empty()) {
-        std::string tool_call = result["choices"][0];
-        std::out << "Tool call detected: " << tool_call << std::endl;
+    if(message.contains("tool_calls") && !message["tool_calls"].empty()) {
+      json tool_call = message["tool_calls"][0];
+
+      std::string tool_id = tool_call["id"];
+      std::string tool_type = tool_call["type"];
+
+      json function = tool_call["function"]
+      std::string function_name = function["name"];
+
+      json arguments = json::parse(function["arguments"]);
+
+      if(function_name == "Read") {
+        std::string file_path = arguments["file_path"];
+        std::ifstream;
+
+        std::cout<< message["content"].get<std::string>() << std::endl;
+      }
     }
 
     // You can use print statements as follows for debugging, they'll be visible when running tests.
