@@ -33,6 +33,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    while(true){
     json request_body = {
         {"model", "anthropic/claude-haiku-4.5"},
         {"messages", json::array({
@@ -75,36 +76,30 @@ int main(int argc, char* argv[]) {
 
     json result = json::parse(response.text);
 
-    json message = result["choices"][0]["message"];
 
     if (!result.contains("choices") || result["choices"].empty()) {
         std::cerr << "No choices in response" << std::endl;
         return 1;
     }
 
-    if(message.contains("tool_calls") && !message["tool_calls"].empty()) {
-      json tool_call = message["tool_calls"][0];
+    json message = result["choices"][0]["message"];
+    messages.push_back(message);
+    }
 
-      std::string tool_id = tool_call["id"];
-      std::string tool_type = tool_call["type"];
-
-      json function = tool_call["function"];
-      std::string function_name = function["name"];
-
-      std::string raw_arguments = function["arguments"];
-      json arguments = json::parse(raw_arguments);
-
-      if(function_name == "Read") {
-        std::string file_path = arguments["file_path"];
-        std::ifstream file(file_path);
-
-        std::ostringstream buffer;
-        buffer << file.rdbuf();
-
-        std::cout << buffer.str();
-
-        return 0;
+    if (!message["tool_calls"].empty()) {
+      for (const auto &tool_call : message["tool_calls"]) {
+        const auto &function = tool_call["function"];
+        auto content = tools::execute(function["name"].get<std::string>(),
+                                      function["arguments"].get<std::string>());
+        messages.push_back({
+            {"role", "tool"},
+            {"tool_call_id", tool_call["id"].get<std::string>()},
+            {"content", content},
+        });
       }
+    } else {
+      std::cout << message["content"].get<std::string>();
+      break;
     }
 
     // You can use print statements as follows for debugging, they'll be visible when running tests.
