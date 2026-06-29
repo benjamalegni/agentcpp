@@ -33,6 +33,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    json messages = json::array({{{"role", "user"}, {"content", prompt}}});
+    json tools = tools::get();
+
     while(true){
     json request_body = {
         {"model", "anthropic/claude-haiku-4.5"},
