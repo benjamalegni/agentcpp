@@ -25,9 +25,13 @@ json get_first_message(const json& result) {
 }
 }
 
-int run_agent(const Config& config, const std::string& prompt) {
+int run_agent(
+    const Config& config,
+    const std::string& prompt,
+    const ToolRegistry& tools
+) {
     json messages = json::array({{{"role", "user"}, {"content", prompt}}});
-    json available_tools = get_tools();
+    json available_tools = tools.definitions();
 
     while (true) {
         json result = send_chat_completion(config, messages, available_tools);
@@ -39,7 +43,7 @@ int run_agent(const Config& config, const std::string& prompt) {
             !message["tool_calls"].empty()) {
             for (const auto& tool_call : message["tool_calls"]) {
                 const auto& function = tool_call.at("function");
-                std::string content = execute_tool(
+                std::string content = tools.execute(
                     function.at("name").get<std::string>(),
                     function.contains("arguments") ? function["arguments"] : json::object()
                 );

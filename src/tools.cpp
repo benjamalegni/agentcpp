@@ -1,23 +1,16 @@
 #include "tools.hpp"
 
-#include <fstream>
-#include <sstream>
+#include "tools/read.h"
+#include "tools/write.h"
+
+#include <memory>
 #include <string>
+#include <string_view>
+#include <utility>
 
 using json = nlohmann::json;
 
 namespace {
-std::string read_file(const std::string& file_path) {
-    std::ifstream file(file_path);
-    if (!file) {
-        return "Error: unable to read file: " + file_path;
-    }
-
-    std::ostringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
-}
-
 json parse_tool_arguments(const json& arguments) {
     if (arguments.is_string()) {
         return json::parse(arguments.get<std::string>());
@@ -31,60 +24,41 @@ json parse_tool_arguments(const json& arguments) {
 }
 }
 
-json get_tools() {
-    return json::array({
-        {
-            {"type", "function"},
-            {"function", {
-                {"name", "Read"},
-                {"description", "Read and return the contents of a file"},
-                {"parameters", {
-                    {"type", "object"},
-                    {"properties", {
-                        {"file_path", {
-                            {"type", "string"},
-                            {"description", "The path to the file to read"}
-                        }}
-                    }},
-                    {"required", json::array({"file_path"})}
-                }}
-            }},
-            {"function", {
-                {"name", "Write"},
-                {"description", "Write content to a file"},
-                {"parameters", {
-                    {"type", "object"},
-                    {"properties", {
-                        {"file_path", {
-                            {"type", "string"},
-                            {"description", "The path to the file to write to"}
-                        }},
-
-                        {"content", {
-                            {"type", "string"},
-                            {"description", "The content to write to the file"}
-                        }}
-                    }},
-                    {"required", json::array({"file_path"})}
-                }}
-            }}
-        }
-    });
+void ToolRegistry::add(std::unique_ptr<Tool> tool) {
+    tools_.push_back(std::move(tool));
 }
 
-std::string execute_tool(const std::string& name, const json& arguments) {
-    if (name != "Read") {
-        return "Error: unknown tool: " + name;
+json ToolRegistry::definitions() const {
+    json definitions = json::array();
+    for (const auto& tool : tools_) {
+        definitions.push_back(tool->definition());
+    }
+    return definitions;
+}
+
+std::string ToolRegistry::execute(std::string_view name, const json& arguments) const {
+    const Tool* selected_tool = nullptr;
+    for (const auto& tool : tools_) {
+        if (tool->name() == name) {
+            selected_tool = tool.get();
+            break;
+        }
+    }
+
+    if (selected_tool == nullptr) {
+        return "Error: unknown tool: " + std::string(name);
     }
 
     try {
-        json parsed_arguments = parse_tool_arguments(arguments);
-        if (!parsed_arguments.contains("file_path") || !parsed_arguments["file_path"].is_string()) {
-            return "Error: missing required argument: file_path";
-        }
-
-        return read_file(parsed_arguments["file_path"].get<std::string>());
+        return selected_tool->execute(parse_tool_arguments(arguments));
     } catch (const json::exception& exception) {
         return "Error: invalid tool arguments: " + std::string(exception.what());
     }
+}
+
+ToolRegistry make_default_tool_registry() {
+    ToolRegistry registry;
+    registry.add(std::make_unique<ReadTool>());
+    registry.add(std::make_unique<WriteTool>());
+    return registry;
 }

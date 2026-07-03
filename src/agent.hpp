@@ -4,4 +4,10 @@
 
 #include <string>
 
-int run_agent(const Config& config, const std::string& prompt);
+class ToolRegistry;
+
+int run_agent(
+    const Config& config,
+    const std::string& prompt,
+    const ToolRegistry& tools
+);
