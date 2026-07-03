@@ -10,16 +10,14 @@
 
 using json = nlohmann::json;
 
+// ADR / TDA in spanish of ToolRegistry, where it is possible 
+// to do multiple operations with tools, such as adding new tools, getting the definitions of the tools and executing a tool by its name and arguments.
+
 namespace {
 json parse_tool_arguments(const json& arguments) {
     if (arguments.is_string()) {
         return json::parse(arguments.get<std::string>());
     }
-
-    if (arguments.is_object()) {
-        return arguments;
-    }
-
     return json::object();
 }
 }
