@@ -58,5 +58,6 @@ ToolRegistry make_default_tool_registry() {
     ToolRegistry registry;
     registry.add(std::make_unique<ReadTool>());
     registry.add(std::make_unique<WriteTool>());
+    // add more later on
     return registry;
 }
