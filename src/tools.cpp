@@ -1,7 +1,7 @@
 #include "tools.hpp"
 
-#include "tools/read.h"
-#include "tools/write.h"
+#include "read.h"
+#include "write.h"
 
 #include <memory>
 #include <string>
