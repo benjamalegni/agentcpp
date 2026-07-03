@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/tool.hpp"
+#include "../src/tools/include/tool.hpp"
 
 #include <nlohmann/json.hpp>
 

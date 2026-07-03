@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tool.hpp"
+#include "../tool.hpp"
 
 class ReadTool final : public Tool {
 public:
