@@ -1,7 +1,9 @@
-//
-// Created by luka on 7/19/26.
-//
-#import "bash.h"
+#include "bash.h"
+
+#include <array>
+#include <cstdio>
+#include <memory>
+#include <string>
 
 using json = nlohmann::json;
 
@@ -15,39 +17,41 @@ std::string_view BashTool::description() const noexcept {
 
 json BashTool::parameters() const {
     return {
-            {"type", "object"},
-            {"properties", {
-                {"command", {
-                    {"type", "string"},
-                    {"description", "The command to execute"},
-                }},
-            }},
-            {"required", json::array({"command"})},
-        };
+        {"type", "object"},
+        {"properties",
+         {{"command",
+           {{"type", "string"}, {"description", "The command to execute"}}}}},
+        {"required", json::array({"command"})},
+    };
 }
 
 std::string BashTool::execute(const json& arguments) const {
     if (!arguments.contains("command") || !arguments["command"].is_string()) {
-        return "Error: missing command in bash request or invalid request";
+        return "Error: missing command in bash request";
     }
 
     const std::string command_string = arguments["command"].get<std::string>();
-    const char * command = command_string.c_str();
 
-    // bash command execution with pipe
+    std::array<char, 4096> buffer;
+    std::string stdout_result;
+    std::string stderr_result;
 
-    std::array<char, 128> buffer;
-    std::string result;
+    {
+        std::unique_ptr<FILE, decltype(&pclose)> pipe(
+            popen((command_string + " 2>&1").c_str(), "r"), pclose);
 
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command, "r"), pclose);
+        if (!pipe) {
+            return "Error: failed to execute command";
+        }
 
-    if (!pipe) {
-        return "Error opening pipe for bash command execution";
+        while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+            stdout_result += buffer.data();
+        }
     }
 
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
-        result += buffer.data();
+    if (stdout_result.empty()) {
+        return "[command completed with no output]";
     }
 
-    return result;
+    return stdout_result;
 }

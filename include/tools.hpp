@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tool.hpp"
+#include "tool_context.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -13,12 +14,18 @@ class ToolRegistry {
 public:
     void add(std::unique_ptr<Tool> tool);
     nlohmann::json definitions() const;
-    std::string execute(
+    bool requires_approval(
         std::string_view name,
         const nlohmann::json& arguments
     ) const;
+    std::string execute(
+        std::string_view name,
+        const nlohmann::json& arguments,
+        const ToolContext& context
+    ) const;
 
 private:
+    const Tool* find_tool(std::string_view name) const;
     std::vector<std::unique_ptr<Tool>> tools_;
 };
 

@@ -8,5 +8,7 @@ struct Config {
     std::string model;
 };
 
+bool wants_tui(int argc, char* argv[]);
 std::string parse_prompt(int argc, char* argv[]);
 Config load_config();
+void print_usage();
