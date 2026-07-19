@@ -1,14 +1,6 @@
-//
-// Created by luka on 7/19/26.
-//
+#pragma once
 
-#ifndef CODECRAFTERS_CLAUDE_CODE_BASH_H
-#define CODECRAFTERS_CLAUDE_CODE_BASH_H
-
-#endif //CODECRAFTERS_CLAUDE_CODE_BASH_H
 #include "tool.hpp"
-
-using namespace std;
 
 class BashTool final : public Tool {
 public:

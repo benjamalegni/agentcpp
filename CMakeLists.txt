@@ -1,46 +1,49 @@
-cmake_minimum_required(VERSION 3.13)
-
+cmake_minimum_required(VERSION 3.16)
 project(codecrafters-claude-code)
 
-set(CMAKE_CXX_STANDARD 23) # Enable the C++23 standard
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
-        include/*.h
-        include/*.hpp
-        src/*.cpp
-        src/*.h
-        src/*.hpp)
+find_package(cpr CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(ftxui CONFIG REQUIRED)
 
-include(FetchContent)
-
-FetchContent_Declare(
-        cpr
-        GIT_REPOSITORY https://github.com/libcpr/cpr.git
-        GIT_TAG        1.10.x
+add_library(claude_code_core STATIC
+    src/agent_session.cpp
+    src/openrouter_provider.cpp
+    src/tools.cpp
+    src/tools/read.cpp
+    src/tools/write.cpp
+    src/tools/bash.cpp
+    src/config/config.cpp
 )
-FetchContent_MakeAvailable(cpr)
 
-FetchContent_Declare(
-        nlohmann_json
-        GIT_REPOSITORY https://github.com/nlohmann/json.git
-        GIT_TAG        v3.11.3
+target_include_directories(claude_code_core PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tools/include
 )
-FetchContent_MakeAvailable(nlohmann_json)
 
+target_link_libraries(claude_code_core PUBLIC
+    cpr::cpr
+    nlohmann_json::nlohmann_json
+)
 
-add_executable(claude-code ${SOURCE_FILES}
-        src/tools/read.cpp
-        src/tools/read.cpp
-        src/tools/write.cpp
-        src/tools/include/read.h
-        src/tools/include/tool.hpp
-        src/tools/bash.cpp
-        src/tools/include/bash.h)
+add_executable(claude-code
+    src/main.cpp
+    src/tui/tui_app.cpp
+)
+
+target_link_libraries(claude-code PRIVATE
+    claude_code_core
+    ftxui::component
+    ftxui::dom
+    ftxui::screen
+)
 
 target_include_directories(claude-code PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/tools/include)
-
-target_link_libraries(claude-code PRIVATE cpr::cpr nlohmann_json::nlohmann_json)
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/tools/include
+)
