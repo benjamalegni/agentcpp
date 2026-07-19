@@ -2,6 +2,7 @@
 
 #include "read.h"
 #include "write.h"
+#include "bash.h"
 
 #include <memory>
 #include <string>
@@ -58,6 +59,7 @@ ToolRegistry make_default_tool_registry() {
     ToolRegistry registry;
     registry.add(std::make_unique<ReadTool>());
     registry.add(std::make_unique<WriteTool>());
+    registry.add(std::make_unique<BashTool>());
     // add more later on
     return registry;
 }

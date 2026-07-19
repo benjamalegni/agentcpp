@@ -12,10 +12,31 @@ file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
         src/*.h
         src/*.hpp)
 
-find_package(cpr CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
+include(FetchContent)
 
-add_executable(claude-code ${SOURCE_FILES})
+FetchContent_Declare(
+        cpr
+        GIT_REPOSITORY https://github.com/libcpr/cpr.git
+        GIT_TAG        1.10.x
+)
+FetchContent_MakeAvailable(cpr)
+
+FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG        v3.11.3
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
+
+add_executable(claude-code ${SOURCE_FILES}
+        src/tools/read.cpp
+        src/tools/read.cpp
+        src/tools/write.cpp
+        src/tools/include/read.h
+        src/tools/include/tool.hpp
+        src/tools/bash.cpp
+        src/tools/include/bash.h)
 
 target_include_directories(claude-code PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
